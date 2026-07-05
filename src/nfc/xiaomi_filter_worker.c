@@ -50,9 +50,13 @@ static XiaomiFilterWorkerResult
         return XiaomiFilterWorkerResultReadFailed;
     }
 
-    // 3. Authenticate. Success is the definitive "genuine Xiaomi filter" signal.
+    // 3. Authenticate. mf_ultralight_poller_auth_pwd() returns MfUltralightErrorNone
+    // only when the tag answers PWD_AUTH with a valid PACK, i.e. accepts the password
+    // — the definitive "genuine Xiaomi filter" signal. Note: it does NOT populate
+    // auth.auth_success (only the standard read flow does), so the error code is the
+    // only meaningful result here.
     MfUltralightError err = mf_ultralight_poller_auth_pwd(poller, &auth);
-    if(err != MfUltralightErrorNone || !auth.auth_success) {
+    if(err != MfUltralightErrorNone) {
         return XiaomiFilterWorkerResultAuthFailed;
     }
 
