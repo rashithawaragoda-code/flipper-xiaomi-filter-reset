@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build FAP (${{ matrix.sdk-channel }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk-channel: [release, dev]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build with ufbt
+        id: build-app
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+        with:
+          sdk-channel: ${{ matrix.sdk-channel }}
+
+      - name: Upload FAP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: xiaomi_filter_reset-${{ matrix.sdk-channel }}
+          path: ${{ steps.build-app.outputs.fap-artifacts }}
+          if-no-files-found: error
+
+  test:
+    name: Host unit tests + core lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Lint the pure core (strict warnings)
+        run: make -C test lint
+
+      - name: Run host unit tests
+        run: make -C test test
+
+  format:
+    name: Format check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install ufbt
+        run: pip install ufbt
+
+      - name: Fetch SDK
+        run: ufbt update --channel=release
+
+      - name: Check formatting
+        run: ufbt lint
+
+  clang-tidy:
+    name: clang-tidy (core)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install clang-tidy
+        run: sudo apt-get update && sudo apt-get install -y clang-tidy
+
+      - name: Analyze core
+        run: clang-tidy src/core/*.c -- -std=c11 -Isrc/core
