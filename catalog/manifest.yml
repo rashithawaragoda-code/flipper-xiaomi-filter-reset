@@ -13,7 +13,7 @@ sourcecode:
   type: git
   location:
     origin: https://github.com/khmm12/flipper-xiaomi-filter-reset.git
-    commit_sha: REPLACE_WITH_RELEASE_COMMIT_SHA
+    commit_sha: 38ed9eb7bd39388477ddb9ed1b122d6daa0db898
 
 name: Xiaomi Filter Reset
 id: xiaomi_filter_reset
