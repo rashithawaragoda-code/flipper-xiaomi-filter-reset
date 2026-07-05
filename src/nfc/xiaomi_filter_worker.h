@@ -68,8 +68,18 @@ void xiaomi_filter_worker_stop(XiaomiFilterWorker* worker);
 /** @brief Result of the most recent attempt. */
 XiaomiFilterWorkerResult xiaomi_filter_worker_get_result(const XiaomiFilterWorker* worker);
 
-/** @brief Usage counter value read before the reset (arbitrary vendor units). */
-uint32_t xiaomi_filter_worker_get_old_counter(const XiaomiFilterWorker* worker);
+/**
+ * @brief Read the pre-reset usage counter, if it was captured.
+ *
+ * The counter read is best-effort: on a transient read failure the prior value is
+ * unknown. Returning "unknown" distinctly from a genuine zero lets the caller avoid
+ * claiming the tag "was already fresh" when it simply could not read the prior value.
+ *
+ * @param[in]  worker      worker instance
+ * @param[out] out_counter receives the pre-reset counter (vendor units) when true is returned
+ * @return true if the counter was read before the reset, false if it is unknown
+ */
+bool xiaomi_filter_worker_get_old_counter(const XiaomiFilterWorker* worker, uint32_t* out_counter);
 
 /**
  * @brief Copy the decoded product code (e.g. "AP11") of the last processed tag.

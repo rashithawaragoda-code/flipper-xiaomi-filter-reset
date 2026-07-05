@@ -21,6 +21,7 @@ struct XiaomiFilterWorker {
 
     XiaomiFilterWorkerResult result;
     uint32_t old_counter;
+    bool old_counter_valid; /**< Whether old_counter was actually read (step 5). */
     uint8_t factory_id_page[XIAOMI_FILTER_PAGE_SIZE];
     uint8_t product_id_page[XIAOMI_FILTER_PAGE_SIZE];
 };
@@ -67,10 +68,13 @@ static XiaomiFilterWorkerResult
         memcpy(worker->product_id_page, read.page[1].data, XIAOMI_FILTER_PAGE_SIZE);
     }
 
-    // 5. Read the current usage counter (page 8) for before/after feedback.
+    // 5. Read the current usage counter (page 8) for before/after feedback. Best-effort:
+    // if the read fails, old_counter_valid stays false so the UI never claims to know the
+    // prior state it could not read.
     if(mf_ultralight_poller_read_page(poller, XIAOMI_FILTER_COUNTER_PAGE, &read) ==
        MfUltralightErrorNone) {
         worker->old_counter = xiaomi_filter_counter_from_page(read.page[0].data);
+        worker->old_counter_valid = true;
     }
 
     // 6. Write zeros to the counter page: resets filter life to 100%.
@@ -135,6 +139,7 @@ void xiaomi_filter_worker_start(
     worker->context = context;
     worker->result = XiaomiFilterWorkerResultNotDetected;
     worker->old_counter = 0;
+    worker->old_counter_valid = false;
     memset(worker->factory_id_page, 0, sizeof(worker->factory_id_page));
     memset(worker->product_id_page, 0, sizeof(worker->product_id_page));
 
@@ -155,8 +160,11 @@ XiaomiFilterWorkerResult xiaomi_filter_worker_get_result(const XiaomiFilterWorke
     return worker->result;
 }
 
-uint32_t xiaomi_filter_worker_get_old_counter(const XiaomiFilterWorker* worker) {
-    return worker->old_counter;
+bool xiaomi_filter_worker_get_old_counter(const XiaomiFilterWorker* worker, uint32_t* out_counter) {
+    if(worker->old_counter_valid && out_counter) {
+        *out_counter = worker->old_counter;
+    }
+    return worker->old_counter_valid;
 }
 
 void xiaomi_filter_worker_get_product_code(

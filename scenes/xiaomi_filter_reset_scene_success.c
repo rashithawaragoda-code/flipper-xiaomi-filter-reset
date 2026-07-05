@@ -21,9 +21,12 @@ void xiaomi_filter_reset_scene_success_on_enter(void* context) {
 
     char product[XIAOMI_FILTER_PRODUCT_CODE_SIZE];
     xiaomi_filter_worker_get_product_code(app->worker, product);
-    // A zero counter means the tag was already fresh; say so instead of implying we
-    // undid wear that wasn't there.
-    const bool was_fresh = xiaomi_filter_worker_get_old_counter(app->worker) == 0;
+    // "Already fresh" is a claim about the tag's prior state, so only make it when the
+    // pre-reset counter was actually read and was zero. If the read failed we don't know
+    // the prior state, so fall back to the always-true "restored" message.
+    uint32_t old_counter = 0;
+    const bool was_fresh = xiaomi_filter_worker_get_old_counter(app->worker, &old_counter) &&
+                           old_counter == 0;
 
     snprintf(
         xiaomi_filter_reset_success_text,
