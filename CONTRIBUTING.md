@@ -11,9 +11,19 @@ Thanks for your interest in improving Xiaomi Filter Reset!
 
 ## Development setup
 
+With [mise](https://mise.jdx.dev/), which provisions `ufbt` from the committed
+`mise.toml`:
+
 ```sh
-python3 -m pip install --user ufbt   # micro Flipper Build Tool
-ufbt                                 # build the FAP (downloads the SDK on first run)
+mise install   # installs ufbt (micro Flipper Build Tool)
+ufbt           # build the FAP (downloads the SDK on first run)
+```
+
+Or install `ufbt` yourself:
+
+```sh
+python3 -m pip install --user ufbt
+ufbt
 ```
 
 ## Before you open a PR
@@ -36,9 +46,9 @@ If you change formatting-affecting code, run `ufbt format` to apply the project'
 - NFC/tag interaction → `src/nfc/`.
 - UI → `scenes/`.
 
-See [`CLAUDE.md`](./CLAUDE.md) for architecture and the hardware-verified protocol
-facts, and [`docs/protocol.md`](./docs/protocol.md) for the reverse-engineering
-details.
+See [`docs/protocol.md`](./docs/protocol.md) for the reverse-engineering write-up,
+the on-tag memory map, and the hardware-verified protocol facts; the high-level
+architecture is summarized in the [README](./README.md#project-layout).
 
 ## Testing on hardware
 

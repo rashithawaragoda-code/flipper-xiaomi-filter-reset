@@ -102,7 +102,7 @@ etc.) and offers a **Retry**.
 Builds use [`ufbt`](https://pypi.org/project/ufbt/), the micro Flipper Build Tool.
 
 ```sh
-# 1. Install ufbt (once)
+# 1. Install ufbt (once). Using mise? `mise install` provisions it from mise.toml.
 python3 -m pip install --user ufbt
 
 # 2. Build the app (downloads the matching SDK on first run)
@@ -135,6 +135,7 @@ is validated against golden vectors read from real filter tags.
 ```
 .
 ├── application.fam                # Flipper app manifest
+├── mise.toml                      # optional toolchain (provisions ufbt)
 ├── xiaomi_filter_reset.c          # entry point + app lifecycle
 ├── xiaomi_filter_reset_i.h        # shared app state
 ├── icons/                         # 10x10 app icon
@@ -147,6 +148,11 @@ is validated against golden vectors read from real filter tags.
 ├── catalog/                       # Flipper App Catalog submission manifest
 └── .github/workflows/ci.yml       # build + test + lint
 ```
+
+The firmware-coupled glue — the entry point and the UI `scenes/` — sits at the app
+root next to `application.fam`, matching the layout of Flipper's own apps. The
+portable, host-testable logic is deliberately isolated under `src/` (`core/` has no
+firmware dependency and is unit-tested; `nfc/` is the thin device-driving layer).
 
 ## Contributing
 
