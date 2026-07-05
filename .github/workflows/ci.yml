@@ -19,7 +19,7 @@ jobs:
         sdk-channel: [release, dev]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Build with ufbt
         id: build-app
@@ -28,7 +28,7 @@ jobs:
           sdk-channel: ${{ matrix.sdk-channel }}
 
       - name: Upload FAP artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: xiaomi_filter_reset-${{ matrix.sdk-channel }}
           path: ${{ steps.build-app.outputs.fap-artifacts }}
@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Lint the pure core (strict warnings)
         run: make -C test lint
@@ -52,28 +52,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      # ufbt itself ships the pinned clang-format, so the check runs through the
+      # ufbt-action: provision the SDK once, then run `ufbt lint` against it.
+      - name: Set up ufbt + SDK
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
         with:
-          python-version: "3.x"
-
-      - name: Install ufbt
-        run: pip install ufbt
-
-      - name: Fetch SDK
-        run: ufbt update --channel=release
+          sdk-channel: release
+          task: setup
 
       - name: Check formatting
-        run: ufbt lint
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1
+        with:
+          skip-setup: true
+          task: lint
 
   clang-tidy:
     name: clang-tidy (core)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install clang-tidy
         run: sudo apt-get update && sudo apt-get install -y clang-tidy
