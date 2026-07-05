@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 /**
  * @file test_xiaomi_filter.c
  * @brief Host unit tests for the pure filter core (no firmware dependency).
