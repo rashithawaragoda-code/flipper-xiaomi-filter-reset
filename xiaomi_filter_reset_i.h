@@ -46,4 +46,7 @@ typedef struct {
 
     Nfc* nfc;
     XiaomiFilterWorker* worker;
+
+    // Which action the scan scene should perform, chosen from the start menu.
+    XiaomiFilterWorkerOp pending_op;
 } XiaomiFilterResetApp;

@@ -49,6 +49,9 @@ filters shipped with many Mi Air Purifier models (community reports include the
 been verified on real hardware, identified by their on-tag product code (`AP11`,
 `JDA0`, and `JD26`).
 
+The full reset has been confirmed end-to-end — write, verify, and the appliance
+reporting 100% again — on the **Mi Air Purifier 4** and **Mi Air Purifier 4 Pro**.
+
 Because the app authenticates using a password **derived from each tag's own UID**, a
 successful reset is itself proof the tag is a supported Xiaomi filter. Foreign tags
 simply fail authentication and are never written to.
@@ -103,6 +106,18 @@ for both.
 
 If it fails, the app tells you why (not a Xiaomi filter, tag moved, write rejected,
 etc.) and offers a **Retry**.
+
+### Check filter life (read-only)
+
+**"Check filter life"** does the same authenticated read but never writes. It confirms
+the tag is a genuine Xiaomi filter and reports whether it is **fresh** (counter at 0)
+or has **been used** — handy to verify a filter before resetting, or to confirm a
+reset took.
+
+It deliberately does **not** show a percentage. The tag only stores *elapsed usage* in
+unknown units; the full-scale value that maps to 0% lives in the appliance and differs
+by filter model, so it is not on the tag. Any percentage would be a guess, and this app
+only reports what the hardware actually tells it.
 
 ## Build from source
 

@@ -7,6 +7,7 @@
 
 typedef enum {
     SubmenuIndexReset,
+    SubmenuIndexCheck,
     SubmenuIndexAbout,
 } SubmenuIndex;
 
@@ -28,6 +29,12 @@ void xiaomi_filter_reset_scene_start_on_enter(void* context) {
         xiaomi_filter_reset_scene_start_submenu_callback,
         app);
     submenu_add_item(
+        submenu,
+        "Check filter life",
+        SubmenuIndexCheck,
+        xiaomi_filter_reset_scene_start_submenu_callback,
+        app);
+    submenu_add_item(
         submenu, "About", SubmenuIndexAbout, xiaomi_filter_reset_scene_start_submenu_callback, app);
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(app->scene_manager, XiaomiFilterResetSceneStart));
@@ -43,7 +50,12 @@ bool xiaomi_filter_reset_scene_start_on_event(void* context, SceneManagerEvent e
         scene_manager_set_scene_state(
             app->scene_manager, XiaomiFilterResetSceneStart, event.event);
         if(event.event == SubmenuIndexReset) {
-            scene_manager_next_scene(app->scene_manager, XiaomiFilterResetSceneReset);
+            app->pending_op = XiaomiFilterWorkerOpReset;
+            scene_manager_next_scene(app->scene_manager, XiaomiFilterResetSceneScan);
+            consumed = true;
+        } else if(event.event == SubmenuIndexCheck) {
+            app->pending_op = XiaomiFilterWorkerOpCheck;
+            scene_manager_next_scene(app->scene_manager, XiaomiFilterResetSceneScan);
             consumed = true;
         } else if(event.event == SubmenuIndexAbout) {
             scene_manager_next_scene(app->scene_manager, XiaomiFilterResetSceneAbout);

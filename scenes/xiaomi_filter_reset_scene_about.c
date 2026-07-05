@@ -24,6 +24,11 @@
     "the Flipper.\n"                     \
     "3. Wait for the confirmation.\n"    \
     "\n"                                 \
+    "\"Check filter life\" is a\n"       \
+    "read-only probe: it shows\n"        \
+    "the state and writes\n"             \
+    "nothing to the tag.\n"              \
+    "\n"                                 \
     "\e#How it works\n"                  \
     "The filter carries an\n"            \
     "NTAG213 tag. Its\n"                 \

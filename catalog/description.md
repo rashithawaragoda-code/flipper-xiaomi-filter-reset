@@ -15,6 +15,11 @@ The app authenticates with a password derived from each tag's own UID, so a succ
 reset is proof the tag is a supported Xiaomi filter. Foreign tags fail authentication
 and are never modified.
 
+There is also a read-only "Check filter life": it authenticates and reads the tag
+without writing, so you can confirm a filter is genuine and whether it is fresh or
+already used. It does not show a percentage — the tag only stores elapsed usage, and
+the full-scale rating lives in the appliance, so any percentage would be a guess.
+
 Note: resetting the counter does not clean the filter. Use it to avoid discarding
 filters that still have useful life, or to keep using third-party filters.
 

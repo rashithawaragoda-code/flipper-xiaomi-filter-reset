@@ -48,6 +48,7 @@ static XiaomiFilterResetApp* xiaomi_filter_reset_app_alloc(void) {
 
     app->nfc = nfc_alloc();
     app->worker = xiaomi_filter_worker_alloc();
+    app->pending_op = XiaomiFilterWorkerOpReset;
 
     return app;
 }

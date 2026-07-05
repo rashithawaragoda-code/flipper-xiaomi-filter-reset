@@ -16,6 +16,7 @@ struct XiaomiFilterWorker {
     Nfc* nfc; /**< Borrowed, owned by the app. */
     NfcPoller* poller; /**< Owned while a poll is running. */
 
+    XiaomiFilterWorkerOp op; /**< Reset the counter, or only read it. */
     XiaomiFilterWorkerCallback callback;
     void* context;
 
@@ -27,11 +28,12 @@ struct XiaomiFilterWorker {
 };
 
 /**
- * @brief Perform the full reset transaction against an activated tag.
+ * @brief Run the tag transaction against an activated tag (reset or read-only check).
  *
- * Runs entirely inside the poller callback (worker thread), where the instanced
- * MfUltralight commands are legal to call. Returns the outcome; never writes the
- * counter unless authentication succeeded first.
+ * Always authenticates and reads the counter; for op == Reset it then writes zeros and
+ * verifies, while op == Check stops after the read and never writes. Runs entirely inside
+ * the poller callback (worker thread), where the instanced MfUltralight commands are legal
+ * to call. Returns the outcome; never writes the counter unless authentication succeeded first.
  */
 static XiaomiFilterWorkerResult
     xiaomi_filter_worker_run(XiaomiFilterWorker* worker, MfUltralightPoller* poller) {
@@ -68,13 +70,22 @@ static XiaomiFilterWorkerResult
         memcpy(worker->product_id_page, read.page[1].data, XIAOMI_FILTER_PAGE_SIZE);
     }
 
-    // 5. Read the current usage counter (page 8) for before/after feedback. Best-effort:
-    // if the read fails, old_counter_valid stays false so the UI never claims to know the
-    // prior state it could not read.
-    if(mf_ultralight_poller_read_page(poller, XIAOMI_FILTER_COUNTER_PAGE, &read) ==
-       MfUltralightErrorNone) {
+    // 5. Read the current usage counter (page 8). For a Check this IS the result; for a
+    // Reset it is best-effort before/after feedback (a failed read leaves old_counter_valid
+    // false, so the UI never claims a prior state it could not read).
+    const MfUltralightError counter_err =
+        mf_ultralight_poller_read_page(poller, XIAOMI_FILTER_COUNTER_PAGE, &read);
+    if(counter_err == MfUltralightErrorNone) {
         worker->old_counter = xiaomi_filter_counter_from_page(read.page[0].data);
         worker->old_counter_valid = true;
+    }
+
+    // A Check stops here: the tag is authenticated (a genuine filter) and its counter read,
+    // with nothing written back. A failed counter read is fatal for a Check, since the
+    // counter is the whole point of the probe.
+    if(worker->op == XiaomiFilterWorkerOpCheck) {
+        return (counter_err == MfUltralightErrorNone) ? XiaomiFilterWorkerResultSuccess :
+                                                        XiaomiFilterWorkerResultReadFailed;
     }
 
     // 6. Write zeros to the counter page: resets filter life to 100%.
@@ -128,6 +139,7 @@ void xiaomi_filter_worker_free(XiaomiFilterWorker* worker) {
 void xiaomi_filter_worker_start(
     XiaomiFilterWorker* worker,
     Nfc* nfc,
+    XiaomiFilterWorkerOp op,
     XiaomiFilterWorkerCallback callback,
     void* context) {
     furi_assert(worker);
@@ -135,6 +147,7 @@ void xiaomi_filter_worker_start(
     furi_assert(worker->poller == NULL);
 
     worker->nfc = nfc;
+    worker->op = op;
     worker->callback = callback;
     worker->context = context;
     worker->result = XiaomiFilterWorkerResultNotDetected;

@@ -48,8 +48,11 @@ void xiaomi_filter_reset_scene_error_on_enter(void* context) {
     Widget* widget = app->widget;
     const XiaomiFilterWorkerResult result = xiaomi_filter_worker_get_result(app->worker);
 
+    const char* title = app->pending_op == XiaomiFilterWorkerOpCheck ? "Check failed" :
+                                                                       "Reset failed";
+
     widget_reset(widget);
-    widget_add_string_element(widget, 64, 2, AlignCenter, AlignTop, FontPrimary, "Reset failed");
+    widget_add_string_element(widget, 64, 2, AlignCenter, AlignTop, FontPrimary, title);
     widget_add_text_scroll_element(widget, 0, 16, 128, 34, xiaomi_filter_reset_error_text(result));
     widget_add_button_element(
         widget, GuiButtonTypeCenter, "Retry", xiaomi_filter_reset_scene_error_button_callback, app);
@@ -65,7 +68,7 @@ bool xiaomi_filter_reset_scene_error_on_event(void* context, SceneManagerEvent e
     if(event.type == SceneManagerEventTypeCustom &&
        event.event == XiaomiFilterResetCustomEventButtonRetry) {
         consumed = true;
-        // Return to the reset scene, which restarts polling on enter.
+        // Return to the scan scene, which restarts polling on enter.
         scene_manager_previous_scene(app->scene_manager);
     } else if(event.type == SceneManagerEventTypeBack) {
         consumed = true;
