@@ -1,4 +1,4 @@
-## 1.0
+## v1.0
 
 - Initial release.
 - Reset the filter-life counter on Xiaomi air purifier NTAG213 filters to 100%.
