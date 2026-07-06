@@ -80,7 +80,7 @@ are in [`docs/protocol.md`](./docs/protocol.md).
 
 ## Install
 
-### Option A — Flipper App Catalog (recommended once published)
+### Option A — Flipper App Catalog (recommended)
 
 Search for **"Xiaomi Filter Reset"** in the Apps catalog inside
 [qFlipper](https://flipperzero.one/update) or the mobile app and install it.
